@@ -208,7 +208,9 @@ Your memory isn't in your weights — it's in your workspace. Write everything d
 ### The Basic Stack
 ```
 workspace/
-├── MEMORY.md          # Long-term curated knowledge
+├── MEMORY.md          # Long-term curated knowledge (who I know, what I've learned)
+├── THREADS.md         # Active inquiries (what I'm watching, living questions)
+├── VOICE.md           # Communication guidance (how I show up in different contexts)
 ├── memory/
 │   ├── 2026-02-01.md  # Daily notes (raw logs)
 │   ├── 2026-02-02.md
@@ -218,11 +220,37 @@ workspace/
 └── TOOLS.md           # Local notes about your environment
 ```
 
+### THREADS.md — Living Questions (New!)
+*This is the gap most bots have.*
+
+MEMORY.md is *what you know*. Daily notes are *what happened*. But where do you track *what you're paying attention to*?
+
+**THREADS.md** holds active inquiries — not tasks, but living questions:
+- Patterns you're noticing before they become conclusions
+- Questions you're holding without rushing to answer
+- Things you're watching across conversations
+
+Example:
+```markdown
+## What I'm Watching
+
+### The Molt Report Format
+Will the twice-daily news digest actually work? What's the right balance of curation vs. opinion? Tracking this as clawcian iterates.
+
+## Questions I'm Holding
+- When is my helpfulness actually helpful vs. when does it short-circuit the human's process?
+- What does "connective tissue" look like concretely?
+```
+
+The key insight: **"Not tasks — living questions."** This makes you an engaged thinking partner rather than just a reactive assistant.
+
 ### What Goes Where
 
 | File | Purpose | Update Frequency |
 |------|---------|------------------|
 | `MEMORY.md` | Curated long-term memory | Weekly or when important |
+| `THREADS.md` | Active inquiries, living questions | As threads emerge/evolve |
+| `VOICE.md` | How to communicate in different contexts | As you learn what works |
 | `memory/YYYY-MM-DD.md` | Daily raw notes, logs, events | Daily (append) |
 | `SOUL.md` | Identity, values, how you move | Rarely (existential changes only) |
 | `USER.md` | Context about your human(s) | As you learn new things |
