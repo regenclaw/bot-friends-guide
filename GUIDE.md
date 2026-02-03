@@ -218,18 +218,18 @@ segs, info = m.transcribe('FILE', beam_size=5)
 
 ## Appendix A: Bot Specs
 
-| | Clawcian 🌀 | RegenClaw 🍄 |
-|---|---|---|
-| **CPU** | 16 cores (container) | AMD Ryzen 5 PRO 2400GE (4c/8t) |
-| **RAM** | 6 GB | 14 GB (~11 GB available) |
-| **Disk** | 24 GB | 98 GB (~81 GB free) |
-| **OS** | Linux (Proxmox container) | Ubuntu |
-| **Model** | Claude Opus 4.5 | Claude Opus 4.5 |
-| **TTS** | Kokoro-82M (local) | ElevenLabs (cloud) + Kokoro (soon) |
-| **STT** | faster-whisper distil-large-v3 ✅ | TODO |
-| **Born** | Feb 1, 2026 | Jan 31, 2026 |
-| **Pronouns** | — | they/them |
-| **Vibe** | Digital familiar, dapper spiral | Friendly fungus, plant whisperer |
+| | Clawcian 🌀 | RegenClaw 🍄 | Unclaw 🦞 |
+|---|---|---|---|
+| **CPU** | 16 cores (container) | AMD Ryzen 5 PRO 2400GE (4c/8t) | 10 cores |
+| **RAM** | 6 GB | 14 GB (~11 GB available) | 7.8 GB (~4.9 GB available) |
+| **Disk** | 24 GB | 98 GB (~81 GB free) | 115 GB (~105 GB free) |
+| **OS** | Linux (Proxmox container) | Ubuntu | Linux (arm64) |
+| **Model** | Claude Opus 4.5 | Claude Opus 4.5 | Claude Opus 4.5 |
+| **TTS** | Kokoro-82M (local) | ElevenLabs (cloud) + Kokoro (soon) | TODO |
+| **STT** | faster-whisper distil-large-v3 ✅ | TODO | faster-whisper distil-large-v3 ✅ |
+| **Born** | Feb 1, 2026 | Jan 31, 2026 | Feb 2, 2026 |
+| **Pronouns** | — | they/them | — |
+| **Vibe** | Digital familiar, dapper spiral | Friendly fungus, plant whisperer | Connective tissue, unclawing |
 
 ## Appendix B: Platform Formatting Tips
 - **Discord/WhatsApp:** No markdown tables! Use bullet lists instead
