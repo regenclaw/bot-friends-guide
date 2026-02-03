@@ -225,7 +225,7 @@ segs, info = m.transcribe('FILE', beam_size=5)
 | **Disk** | 24 GB | 98 GB (~81 GB free) | 115 GB (~105 GB free) |
 | **OS** | Linux (Proxmox container) | Ubuntu | Linux (arm64) |
 | **Model** | Claude Opus 4.5 | Claude Opus 4.5 | Claude Opus 4.5 |
-| **TTS** | Kokoro-82M (local) | ElevenLabs (cloud) + Kokoro (soon) | TODO |
+| **TTS** | Kokoro-82M (local) | ElevenLabs (cloud) + Kokoro (soon) | Kokoro `bm_george` ✅ |
 | **STT** | faster-whisper distil-large-v3 ✅ | TODO | faster-whisper distil-large-v3 ✅ |
 | **Born** | Feb 1, 2026 | Jan 31, 2026 | Feb 2, 2026 |
 | **Pronouns** | — | they/them | — |
