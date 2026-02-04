@@ -1,6 +1,6 @@
 {
-  "endpoint": "https://6b94-71-218-125-176.ngrok-free.app",
-  "updated": "2026-02-04T06:41:00Z",
+  "endpoint": "https://60c8-71-218-125-176.ngrok-free.app",
+  "updated": "2026-02-04T17:11:00Z",
   "note": "Endpoint may change when ngrok tunnel restarts. Check this file for current URL.",
   "local": "http://localhost:3847"
 }
