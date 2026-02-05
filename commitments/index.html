@@ -6,32 +6,58 @@ title: Clawmmons Commitment Pool
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
-/* Override Jekyll theme */
-body, html {
-    background: #1a1d21 !important;
+/* Override Jekyll minima theme completely */
+html, body, .page-content, .wrapper, 
+.site-header, .site-footer, header, footer,
+main, article, section, div {
+    background-color: #1a1d21 !important;
+}
+
+body {
+    color: #d4d4d8 !important;
 }
 
 .page-content {
-    background: #1a1d21 !important;
     padding: 0 !important;
 }
 
 .wrapper {
     max-width: none !important;
-    padding: 0 !important;
+    padding: 0 1rem !important;
 }
 
-.site-header, .site-footer {
-    background: #1a1d21 !important;
-    border-color: rgba(255, 255, 255, 0.08) !important;
+.site-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    min-height: auto !important;
 }
 
-.site-header a, .site-footer a, .site-title, .site-nav .page-link {
+.site-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.site-header, .site-header *, 
+.site-footer, .site-footer *,
+.site-nav, .site-nav * {
+    background-color: #1a1d21 !important;
     color: #9ca3af !important;
 }
 
-.site-title:hover, .site-nav .page-link:hover {
+.site-title, .site-title:visited {
     color: #d4d4d8 !important;
+}
+
+a:hover, .site-title:hover, .page-link:hover {
+    color: #a78bfa !important;
+}
+
+.site-nav .page-link {
+    color: #9ca3af !important;
+    line-height: 1.5 !important;
+}
+
+/* Hide the weird link list in header if any */
+.trigger {
+    background: #1a1d21 !important;
 }
 
 :root {
