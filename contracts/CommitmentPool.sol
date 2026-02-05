@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -8,215 +8,156 @@ import "@openzeppelin/contracts/utils/Pausable.sol";
 /**
  * @title Clawmmons Commitment Pool
  * @notice Agents stake ETH on deliverables. Deliver → refund. Miss deadline → stake to treasury.
- * @dev Verification supports both single-verifier and N-of-M agent voting modes.
+ * @dev Simplified v2: single resolve() function with majority voting, permissionless claim() after deadline.
  */
 contract CommitmentPool is ReentrancyGuard, Ownable, Pausable {
-
-    enum Status { Active, Verified, Slashed }
+    enum Status { Active, Resolved }
 
     struct Commitment {
         address staker;
         uint256 amount;
         string deliverable;
         uint256 deadline;
-        address verifier;       // Single verifier (address(0) = use agent voting)
         Status status;
+        bool outcome;
         uint256 createdAt;
-        uint256 verifyCount;    // Number of agent votes received
+        uint256 resolvedAt;
+        uint256 votesFor;
+        uint256 votesAgainst;
     }
 
-    // --- State ---
     address public treasury;
     uint256 public nextId;
     uint256 public totalStaked;
     uint256 public totalSlashed;
     uint256 public totalRefunded;
 
-    // Agent voting config
-    address[] public agents;
-    mapping(address => bool) public isAgent;
-    uint256 public quorum;  // How many agents needed to verify (e.g., 3 of 5)
-
+    address[] public validators;
+    mapping(address => bool) public isValidator;
     mapping(uint256 => Commitment) public commitments;
-    mapping(uint256 => mapping(address => bool)) public hasVoted; // commitmentId => agent => voted
+    mapping(uint256 => mapping(address => bool)) public hasVoted;
 
-    // --- Events ---
-    event CommitmentCreated(uint256 indexed id, address indexed staker, uint256 amount, string deliverable, uint256 deadline, address verifier);
-    event CommitmentVerified(uint256 indexed id, address indexed staker, uint256 amount);
-    event CommitmentSlashed(uint256 indexed id, address indexed staker, uint256 amount, address treasury);
-    event CommitmentExtended(uint256 indexed id, uint256 oldDeadline, uint256 newDeadline);
-    event VoteCast(uint256 indexed id, address indexed agent, uint256 currentVotes, uint256 quorum);
-    event AgentAdded(address indexed agent);
-    event AgentRemoved(address indexed agent);
-    event QuorumUpdated(uint256 oldQuorum, uint256 newQuorum);
+    event CommitmentCreated(uint256 indexed id, address indexed staker, uint256 amount, string deliverable, uint256 deadline);
+    event Voted(uint256 indexed id, address indexed validator, bool delivered, uint256 votesFor, uint256 votesAgainst);
+    event Resolved(uint256 indexed id, address indexed staker, uint256 amount, bool delivered);
+    event ValidatorAdded(address indexed validator);
+    event ValidatorRemoved(address indexed validator);
     event TreasuryUpdated(address oldTreasury, address newTreasury);
 
-    constructor(address _treasury, address[] memory _agents, uint256 _quorum) Ownable(msg.sender) {
+    constructor(address _treasury, address[] memory _validators) Ownable(msg.sender) {
         require(_treasury != address(0), "Invalid treasury");
-        require(_quorum > 0 && _quorum <= _agents.length, "Invalid quorum");
-
+        require(_validators.length >= 3, "Need at least 3 validators");
         treasury = _treasury;
-        quorum = _quorum;
-
-        for (uint256 i = 0; i < _agents.length; i++) {
-            require(_agents[i] != address(0), "Invalid agent");
-            require(!isAgent[_agents[i]], "Duplicate agent");
-            agents.push(_agents[i]);
-            isAgent[_agents[i]] = true;
+        for (uint256 i = 0; i < _validators.length; i++) {
+            require(_validators[i] != address(0), "Invalid validator");
+            require(!isValidator[_validators[i]], "Duplicate validator");
+            validators.push(_validators[i]);
+            isValidator[_validators[i]] = true;
         }
     }
-
-    // --- Core ---
 
     /**
      * @notice Stake ETH on a deliverable
      * @param deliverable Description of what you'll deliver
      * @param deadline Unix timestamp — must deliver by this time
-     * @param verifier Single verifier address, or address(0) to use agent voting
      */
-    function commit(
-        string calldata deliverable,
-        uint256 deadline,
-        address verifier
-    ) external payable whenNotPaused returns (uint256) {
+    function commit(string calldata deliverable, uint256 deadline) external payable whenNotPaused returns (uint256) {
         require(msg.value > 0, "Must stake ETH");
         require(deadline > block.timestamp, "Deadline must be future");
-        require(verifier != msg.sender, "Cannot self-verify");
-
         uint256 id = nextId++;
         commitments[id] = Commitment({
             staker: msg.sender,
             amount: msg.value,
             deliverable: deliverable,
             deadline: deadline,
-            verifier: verifier,
             status: Status.Active,
+            outcome: false,
             createdAt: block.timestamp,
-            verifyCount: 0
+            resolvedAt: 0,
+            votesFor: 0,
+            votesAgainst: 0
         });
-
         totalStaked += msg.value;
-
-        emit CommitmentCreated(id, msg.sender, msg.value, deliverable, deadline, verifier);
+        emit CommitmentCreated(id, msg.sender, msg.value, deliverable, deadline);
         return id;
     }
 
     /**
-     * @notice Verify delivery (single verifier mode)
-     * @dev Only callable by the commitment's designated verifier
+     * @notice Vote on whether a commitment was delivered
+     * @param id Commitment ID
+     * @param delivered true = delivered, false = not delivered
+     * @dev Auto-resolves when majority is reached
      */
-    function verify(uint256 id) external nonReentrant {
+    function resolve(uint256 id, bool delivered) external nonReentrant {
         Commitment storage c = commitments[id];
-        require(c.status == Status.Active, "Not active");
-        require(c.verifier != address(0), "Use voteVerify for agent voting");
-        require(msg.sender == c.verifier, "Not verifier");
-
-        _refund(id);
-    }
-
-    /**
-     * @notice Vote to verify delivery (agent voting mode)
-     * @dev Any registered agent can vote. Refunds when quorum is reached.
-     */
-    function voteVerify(uint256 id) external nonReentrant {
-        Commitment storage c = commitments[id];
-        require(c.status == Status.Active, "Not active");
-        require(c.verifier == address(0), "Use verify for single verifier");
-        require(isAgent[msg.sender], "Not an agent");
+        require(c.status == Status.Active, "Already resolved");
+        require(isValidator[msg.sender], "Not a validator");
         require(!hasVoted[id][msg.sender], "Already voted");
-
+        require(msg.sender != c.staker, "Staker cannot vote on own commitment");
+        
         hasVoted[id][msg.sender] = true;
-        c.verifyCount++;
-
-        emit VoteCast(id, msg.sender, c.verifyCount, quorum);
-
-        if (c.verifyCount >= quorum) {
-            _refund(id);
+        if (delivered) { c.votesFor++; } else { c.votesAgainst++; }
+        emit Voted(id, msg.sender, delivered, c.votesFor, c.votesAgainst);
+        
+        uint256 maj = (validators.length / 2) + 1;
+        if (c.votesFor >= maj) {
+            c.status = Status.Resolved;
+            c.outcome = true;
+            c.resolvedAt = block.timestamp;
+            totalRefunded += c.amount;
+            (bool sent,) = c.staker.call{value: c.amount}("");
+            require(sent, "Refund failed");
+            emit Resolved(id, c.staker, c.amount, true);
+        } else if (c.votesAgainst >= maj) {
+            c.status = Status.Resolved;
+            c.outcome = false;
+            c.resolvedAt = block.timestamp;
+            totalSlashed += c.amount;
+            (bool sent,) = treasury.call{value: c.amount}("");
+            require(sent, "Transfer failed");
+            emit Resolved(id, c.staker, c.amount, false);
         }
     }
 
     /**
-     * @notice Slash a commitment after deadline — permissionless
-     * @dev Anyone can call this after the deadline has passed
+     * @notice Claim unresolved commitment after deadline — permissionless
+     * @dev Anyone can call this to sweep stake to treasury if validators haven't resolved
      */
-    function slash(uint256 id) external nonReentrant {
+    function claim(uint256 id) external nonReentrant {
         Commitment storage c = commitments[id];
-        require(c.status == Status.Active, "Not active");
+        require(c.status == Status.Active, "Already resolved");
         require(block.timestamp > c.deadline, "Deadline not passed");
-
-        c.status = Status.Slashed;
+        c.status = Status.Resolved;
+        c.outcome = false;
+        c.resolvedAt = block.timestamp;
         totalSlashed += c.amount;
-
         (bool sent,) = treasury.call{value: c.amount}("");
         require(sent, "Transfer failed");
-
-        emit CommitmentSlashed(id, c.staker, c.amount, treasury);
-    }
-
-    /**
-     * @notice Extend deadline — only by verifier or owner
-     */
-    function extend(uint256 id, uint256 newDeadline) external {
-        Commitment storage c = commitments[id];
-        require(c.status == Status.Active, "Not active");
-        require(newDeadline > c.deadline, "Must extend forward");
-        require(
-            msg.sender == c.verifier || msg.sender == owner(),
-            "Not authorized"
-        );
-
-        uint256 oldDeadline = c.deadline;
-        c.deadline = newDeadline;
-
-        emit CommitmentExtended(id, oldDeadline, newDeadline);
-    }
-
-    // --- Internal ---
-
-    function _refund(uint256 id) internal {
-        Commitment storage c = commitments[id];
-        c.status = Status.Verified;
-        totalRefunded += c.amount;
-
-        (bool sent,) = c.staker.call{value: c.amount}("");
-        require(sent, "Refund failed");
-
-        emit CommitmentVerified(id, c.staker, c.amount);
+        emit Resolved(id, c.staker, c.amount, false);
     }
 
     // --- Admin (Owner = Clawmmons Safe) ---
 
-    function addAgent(address agent) external onlyOwner {
-        require(agent != address(0), "Invalid agent");
-        require(!isAgent[agent], "Already agent");
-        agents.push(agent);
-        isAgent[agent] = true;
-        emit AgentAdded(agent);
+    function addValidator(address validator) external onlyOwner {
+        require(validator != address(0), "Invalid validator");
+        require(!isValidator[validator], "Already validator");
+        validators.push(validator);
+        isValidator[validator] = true;
+        emit ValidatorAdded(validator);
     }
 
-    function removeAgent(address agent) external onlyOwner {
-        require(isAgent[agent], "Not agent");
-        isAgent[agent] = false;
-        // Remove from array
-        for (uint256 i = 0; i < agents.length; i++) {
-            if (agents[i] == agent) {
-                agents[i] = agents[agents.length - 1];
-                agents.pop();
+    function removeValidator(address validator) external onlyOwner {
+        require(isValidator[validator], "Not validator");
+        require(validators.length > 3, "Need at least 3 validators");
+        isValidator[validator] = false;
+        for (uint256 i = 0; i < validators.length; i++) {
+            if (validators[i] == validator) {
+                validators[i] = validators[validators.length - 1];
+                validators.pop();
                 break;
             }
         }
-        // Adjust quorum if needed
-        if (quorum > agents.length) {
-            quorum = agents.length;
-        }
-        emit AgentRemoved(agent);
-    }
-
-    function setQuorum(uint256 _quorum) external onlyOwner {
-        require(_quorum > 0 && _quorum <= agents.length, "Invalid quorum");
-        uint256 old = quorum;
-        quorum = _quorum;
-        emit QuorumUpdated(old, _quorum);
+        emit ValidatorRemoved(validator);
     }
 
     function setTreasury(address _treasury) external onlyOwner {
@@ -235,11 +176,15 @@ contract CommitmentPool is ReentrancyGuard, Ownable, Pausable {
         return commitments[id];
     }
 
-    function getAgents() external view returns (address[] memory) {
-        return agents;
+    function getValidators() external view returns (address[] memory) {
+        return validators;
     }
 
-    function agentCount() external view returns (uint256) {
-        return agents.length;
+    function validatorCount() external view returns (uint256) {
+        return validators.length;
+    }
+
+    function majority() external view returns (uint256) {
+        return (validators.length / 2) + 1;
     }
 }

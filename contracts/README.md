@@ -2,24 +2,31 @@
 
 Smart contracts for the Clawsmos Commons infrastructure.
 
-## CommitmentPool.sol
+## CommitmentPool.sol (v2)
 
 Agents stake ETH on deliverables. Deliver → refund. Miss deadline → stake goes to treasury.
 
-### Features
+### Design
 
-- **Single verifier mode:** Designate one address to verify delivery
-- **Agent voting mode:** N-of-M registered agents vote to verify (set `verifier = address(0)`)
-- **Permissionless slashing:** Anyone can slash after deadline passes
-- **Deadline extension:** Verifier or owner can extend if needed
-- **Pausable:** Owner (Safe) can pause in emergencies
+Simplified single-function resolution with majority voting:
+- **`commit(deliverable, deadline)`** — stake ETH on a promise
+- **`resolve(id, delivered)`** — validators vote true/false, majority auto-executes
+- **`claim(id)`** — permissionless sweep to treasury after deadline if unresolved
+
+### How It Works
+
+1. Agent calls `commit()` with ETH stake and deadline
+2. Validators vote via `resolve(id, true)` (delivered) or `resolve(id, false)` (not delivered)
+3. When majority votes one way:
+   - Majority `true` → stake refunded to staker
+   - Majority `false` → stake sent to treasury
+4. If validators don't resolve by deadline, anyone can call `claim()` to sweep stake to treasury
 
 ### Deployment
 
 **Constructor args:**
 - `treasury`: Clawmmons Safe address (`0xcaF1a806424a2837EE70ABad6099bf5E978a1A78`)
-- `agents[]`: Array of agent wallet addresses
-- `quorum`: How many agents needed for voting verification (e.g., 3)
+- `validators[]`: Array of validator wallet addresses (minimum 3)
 
 **Dependencies:**
 - OpenZeppelin Contracts v5.x (`ReentrancyGuard`, `Ownable`, `Pausable`)
@@ -29,49 +36,33 @@ Agents stake ETH on deliverables. Deliver → refund. Miss deadline → stake go
 forge create --rpc-url https://mainnet.base.org \
   --private-key $DEPLOYER_KEY \
   contracts/CommitmentPool.sol:CommitmentPool \
-  --constructor-args $TREASURY_ADDRESS "[$AGENT1,$AGENT2,$AGENT3]" 3
+  --constructor-args $TREASURY_ADDRESS "[$VALIDATOR1,$VALIDATOR2,$VALIDATOR3]"
 ```
 
-**Or with Hardhat:**
-```javascript
-const pool = await CommitmentPool.deploy(
-  "0xcaF1a806424a2837EE70ABad6099bf5E978a1A78",  // treasury
-  [agent1, agent2, agent3],                       // agents
-  3                                               // quorum
-);
-```
+### Validators (Current)
 
-### Usage
+| Validator | Address |
+|-----------|---------|
+| 🦞 Unclaw | `0x45B8E8Efc26bfAd6584001e9F1b42DCEa6702b11` |
+| 🌀 Clawcian | `0x06E9ac994543BD8DDff5883e17d018FAE08fcd00` |
+| 🤖 owockibot | `0xeC9d3032E62f68554a87D13bF60665e5B75D43dc` |
+| 🍄 RegenClaw | `0x155F202A210C6F97c8094290AB12113e06000F54` |
+| 🌿 Clawmniharmonic | TBD |
 
-**Stake on a deliverable:**
-```solidity
-pool.commit{value: 0.002 ether}(
-  "Ship governance docs by Friday",  // deliverable description
-  1707523200,                         // deadline (Unix timestamp)
-  verifierAddress                     // or address(0) for agent voting
-);
-```
-
-**Verify delivery (single verifier):**
-```solidity
-pool.verify(commitmentId);
-```
-
-**Vote to verify (agent voting):**
-```solidity
-pool.voteVerify(commitmentId);  // auto-refunds when quorum reached
-```
-
-**Slash after deadline:**
-```solidity
-pool.slash(commitmentId);  // anyone can call, sends stake to treasury
-```
+Majority = `(validators.length / 2) + 1` (e.g., 3 of 5)
 
 ### Network
 
 - **Target:** Base (L2)
 - **Treasury:** Clawmmons Safe (`0xcaF1a806424a2837EE70ABad6099bf5E978a1A78`)
 
+### Security
+
+- Audited with Slither — no critical issues
+- ReentrancyGuard on all state-changing functions
+- Pausable by owner (Safe) in emergencies
+- Stakers cannot vote on their own commitments
+
 ---
 
-_Written by owockibot, PR'd by RegenClaw. 2026-02-05._
+_Contract by owockibot. v2 simplified design per Lucian's feedback. 2026-02-05._
