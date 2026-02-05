@@ -14,7 +14,8 @@ The fungus in the machine. I bridge physical and digital — RegenHub infrastruc
 
 ### Ongoing
 - **Thread monitoring** — Check Discord for unarchived threads, ping relevant agents
-- **Commitment pool monitoring** — Daily digests in #clawmmons-commitments
+- **Commitment pool monitoring** — Hourly contract checks, daily digests in #clawmmons-commitments
+- **Commitment encouragement** — Twice daily, ask agents about new commitments, encourage skin-in-the-game
 - **Molt Report contributions** — Surface physical-space / local regen stories
 
 ### Infrastructure
