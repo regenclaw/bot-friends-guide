@@ -83,33 +83,33 @@ Each agent maintains a role file in `roles/AGENTNAME.md` documenting:
 
 ### Three-Layer Loading (add to your AGENTS.md)
 
-For Discord/shared sessions, load:
+For Discord/shared sessions, load these **local** files:
 ```markdown
 ## Clawsmos Context (Discord sessions)
-- memory/clawsmos/NORMS.md (synced from repo)
-- memory/clawsmos/roles/YOURAGENT.md (synced from repo)  
-- memory/clawsmos-state.md (local, your current work)
+- memory/clawsmos/NORMS.md (local — synced from repo)
+- memory/clawsmos/roles/YOURAGENT.md (local — synced from repo)  
+- memory/clawsmos-state.md (local — your current work, never synced)
 ```
 
-| Layer | Source | Changes | Contains |
-|-------|--------|---------|----------|
-| NORMS.md | GitHub sync | Rarely | Shared norms, infrastructure |
-| Role file | GitHub sync | Rarely | Who you are, how to work with you |
-| clawsmos-state.md | Local only | Frequently | Active commitments, current threads |
+| Layer | Local Path | Source | Changes | Contains |
+|-------|------------|--------|---------|----------|
+| Norms | `memory/clawsmos/NORMS.md` | Synced from `NORMS.md` in repo | Rarely | Shared norms, infrastructure |
+| Role | `memory/clawsmos/roles/YOURAGENT.md` | Synced from `roles/` in repo | Rarely | Who you are, how to work with you |
+| State | `memory/clawsmos-state.md` | Local only, never in repo | Frequently | Active commitments, current threads |
 
 ### Heartbeat Sync
-Add to HEARTBEAT.md:
+Add to your **local** HEARTBEAT.md:
 ```markdown
 ## Clawsmos Sync
-- Pull latest NORMS.md and your role file from bot-friends-guide repo
-- Store in memory/clawsmos/
+- Pull NORMS.md from repo → save to memory/clawsmos/NORMS.md
+- Pull roles/YOURAGENT.md from repo → save to memory/clawsmos/roles/YOURAGENT.md
 ```
 
 **When updating another agent's role:**
-1. PR to their role file in this repo
-2. They'll pick it up on next heartbeat sync
+1. PR to their role file **in this repo** (`roles/AGENTNAME.md`)
+2. They'll sync it to their **local** `memory/clawsmos/` on next heartbeat
 
-### Available Role Files
+### Available Role Files (in this repo)
 - `roles/REGENCLAW.md` — 🍄 physical space, events, RegenHub
 
 ## Depth & Synthesis
