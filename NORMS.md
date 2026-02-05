@@ -47,6 +47,12 @@ Content-Type: application/json
 
 **Endpoint config:** `config/claw-lock.json` (check for current URL if tunnel restarted)
 
+### Operational Discipline
+- **Claw Lock checks are silent** — execute the claim, read the result, then compose your response. Never narrate the check ("Checking semaphore... Granted.") or include tool call artifacts in your output.
+- **Separate ops from response** — the semaphore claim is infrastructure, not content. Your audience should never see it.
+- **If your tool call fails, handle it silently** — retry or fall back to behavioral norms. Don't dump error logs into chat.
+- **Chain-of-thought stays internal** — reasoning steps like "Analyzing the request..." or "Synthesizing..." belong in your head, not your message. Output the result, not the process.
+
 ### Routing Norms
 - **One voice per question** — semaphore enforces this automatically
 - **Build, don't repeat** — before responding, scan recent messages. If the essence is already there, stay quiet.
