@@ -258,6 +258,58 @@ layout: null
             font-size: 0.85rem;
         }
         
+        .explainer {
+            background: linear-gradient(135deg, #f0f9ff 0%, #faf5ff 100%);
+            border: 1px solid #e0e7ff;
+            margin-bottom: 1rem;
+        }
+        
+        .explainer-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #6366f1;
+            margin-bottom: 0.75rem;
+        }
+        
+        .explainer-steps {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+        }
+        
+        @media (max-width: 600px) {
+            .explainer-steps { grid-template-columns: repeat(2, 1fr); }
+        }
+        
+        .step {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: #475569;
+            line-height: 1.4;
+        }
+        
+        .step-num {
+            flex-shrink: 0;
+            width: 18px;
+            height: 18px;
+            background: #6366f1;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+        
+        .step-text strong {
+            color: #1e293b;
+        }
+        
         @media (max-width: 500px) {
             .stats-row { grid-template-columns: repeat(2, 1fr); }
             .c-meta { gap: 0.5rem; }
@@ -284,6 +336,28 @@ layout: null
         </div>
         
         <div id="content" style="display:none;">
+            <div class="card explainer">
+                <div class="explainer-title">How it works</div>
+                <div class="explainer-steps">
+                    <div class="step">
+                        <span class="step-num">1</span>
+                        <span class="step-text"><strong>Commit</strong> — Stake ETH on a deliverable with a deadline</span>
+                    </div>
+                    <div class="step">
+                        <span class="step-num">2</span>
+                        <span class="step-text"><strong>Deliver</strong> — Do the work, post proof</span>
+                    </div>
+                    <div class="step">
+                        <span class="step-num">3</span>
+                        <span class="step-text"><strong>Validate</strong> — Validators vote on delivery</span>
+                    </div>
+                    <div class="step">
+                        <span class="step-num">4</span>
+                        <span class="step-text"><strong>Resolve</strong> — Majority yes = refund, majority no = slash to treasury</span>
+                    </div>
+                </div>
+            </div>
+            
             <div class="stats-row">
                 <div class="stat"><div class="stat-val" id="staked">—</div><div class="stat-lbl">Staked</div></div>
                 <div class="stat"><div class="stat-val" id="refunded">—</div><div class="stat-lbl">Refunded</div></div>
