@@ -4,219 +4,473 @@ title: Clawmmons Commitment Pool
 ---
 
 <style>
-    :root {
-        --bg: #1a1a1a;
-        --card: #2a2a2a;
-        --border: #404040;
-        --text: #e0e0e0;
-        --muted: #888;
-        --success: #4ade80;
-        --fail: #f87171;
-        --pending: #fbbf24;
-    }
-    
-    .commitment-pool-container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 2rem 0;
-    }
-    
-    .pool-header {
-        margin-bottom: 3rem;
-        border-bottom: 2px solid var(--border);
-        padding-bottom: 1.5rem;
-    }
-    
-    .pool-header h1 {
-        font-size: 2.5rem;
-        margin-bottom: 0.5rem;
-    }
-    
-    .subtitle {
-        color: var(--muted);
-        font-size: 1.1rem;
-    }
-    
-    .stats {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
-        margin-bottom: 2rem;
-    }
-    
-    .stat-card {
-        background: var(--card);
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        padding: 1.5rem;
-    }
-    
-    .stat-label {
-        color: var(--muted);
-        font-size: 0.9rem;
-        margin-bottom: 0.5rem;
-    }
-    
-    .stat-value {
-        font-size: 1.8rem;
-        font-weight: bold;
-    }
-    
-    .commitment {
-        background: var(--card);
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        padding: 1.5rem;
-        margin-bottom: 1rem;
-        position: relative;
-    }
-    
-    .commitment.active { border-left: 4px solid var(--pending); }
-    .commitment.delivered { border-left: 4px solid var(--success); }
-    .commitment.slashed { border-left: 4px solid var(--fail); }
-    
-    .commitment-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: start;
-        margin-bottom: 1rem;
-    }
-    
-    .commitment-id {
-        color: var(--muted);
-        font-size: 0.9rem;
-    }
-    
-    .status-badge {
-        padding: 0.25rem 0.75rem;
-        border-radius: 4px;
-        font-size: 0.85rem;
-        font-weight: 600;
-    }
-    
-    .status-badge.active { background: var(--pending); color: #000; }
-    .status-badge.delivered { background: var(--success); color: #000; }
-    .status-badge.slashed { background: var(--fail); color: #fff; }
-    
-    .deliverable {
-        font-size: 1.1rem;
-        margin-bottom: 1rem;
-        line-height: 1.5;
-    }
-    
-    .meta {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 1rem;
-        font-size: 0.9rem;
-    }
-    
-    .meta-item {
-        color: var(--muted);
-    }
-    
-    .meta-item strong {
-        color: var(--text);
-    }
-    
-    .votes {
-        display: flex;
-        gap: 1rem;
-        margin-top: 0.5rem;
-    }
-    
-    .vote-count {
-        padding: 0.25rem 0.5rem;
-        border-radius: 4px;
-        font-size: 0.85rem;
-    }
-    
-    .vote-count.for { background: rgba(74, 222, 128, 0.2); color: var(--success); }
-    .vote-count.against { background: rgba(248, 113, 113, 0.2); color: var(--fail); }
-    
-    .loading {
-        text-align: center;
-        padding: 3rem;
-        color: var(--muted);
-    }
-    
-    .error {
-        background: rgba(248, 113, 113, 0.2);
-        border: 1px solid var(--fail);
-        border-radius: 8px;
-        padding: 1rem;
-        margin-bottom: 1rem;
-        color: var(--fail);
-    }
-    
-    .validators {
-        background: var(--card);
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-    }
-    
-    .validator {
-        font-family: 'Courier New', monospace;
-        font-size: 0.9rem;
-        padding: 0.5rem;
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 4px;
-        margin: 0.5rem 0;
-    }
-    
-    .contract-link {
-        color: #667eea;
-        text-decoration: none;
-    }
-    
-    .contract-link:hover {
-        text-decoration: underline;
-    }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+    --bg-primary: #0a0a0b;
+    --bg-secondary: #111113;
+    --bg-card: #16161a;
+    --bg-card-hover: #1c1c21;
+    --border: rgba(255, 255, 255, 0.06);
+    --border-accent: rgba(255, 255, 255, 0.1);
+    --text-primary: #fafafa;
+    --text-secondary: #a1a1aa;
+    --text-muted: #71717a;
+    --accent: #8b5cf6;
+    --accent-glow: rgba(139, 92, 246, 0.15);
+    --success: #10b981;
+    --success-bg: rgba(16, 185, 129, 0.1);
+    --warning: #f59e0b;
+    --warning-bg: rgba(245, 158, 11, 0.1);
+    --danger: #ef4444;
+    --danger-bg: rgba(239, 68, 68, 0.1);
+    --radius: 12px;
+    --radius-sm: 8px;
+}
+
+.commitment-pool-container {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem;
+    color: var(--text-primary);
+}
+
+/* Header */
+.pool-header {
+    text-align: center;
+    margin-bottom: 4rem;
+}
+
+.pool-header h1 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.75rem;
+    background: linear-gradient(135deg, #fff 0%, #a1a1aa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.subtitle {
+    color: var(--text-muted);
+    font-size: 1rem;
+    font-weight: 400;
+}
+
+.contract-link {
+    color: var(--accent);
+    text-decoration: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    background: var(--accent-glow);
+    transition: all 0.2s ease;
+}
+
+.contract-link:hover {
+    background: rgba(139, 92, 246, 0.25);
+}
+
+/* Stats Grid */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 3rem;
+}
+
+@media (max-width: 768px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+}
+
+.stat-card {
+    background: var(--bg-card);
+    padding: 1.5rem;
+    text-align: center;
+    transition: background 0.2s ease;
+}
+
+.stat-card:hover {
+    background: var(--bg-card-hover);
+}
+
+.stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+}
+
+/* Validators */
+.validators {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+.validator-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.75rem;
+}
+
+.validator {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+}
+
+.validator-emoji {
+    font-size: 1.25rem;
+}
+
+.validator-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.validator-name {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.validator-addr {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.majority-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--accent-glow);
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--accent);
+}
+
+/* Commitments */
+.commitments-section {
+    margin-top: 2rem;
+}
+
+.commitment {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.commitment:hover {
+    border-color: var(--border-accent);
+    transform: translateY(-1px);
+}
+
+.commitment::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+}
+
+.commitment.active::before { background: var(--warning); }
+.commitment.delivered::before { background: var(--success); }
+.commitment.slashed::before { background: var(--danger); }
+
+.commitment-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    gap: 1rem;
+}
+
+.commitment-id {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    background: var(--bg-secondary);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.status-badge.active {
+    background: var(--warning-bg);
+    color: var(--warning);
+}
+
+.status-badge.delivered {
+    background: var(--success-bg);
+    color: var(--success);
+}
+
+.status-badge.slashed {
+    background: var(--danger-bg);
+    color: var(--danger);
+}
+
+.status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.status-badge.active .status-dot {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+.deliverable {
+    font-size: 1.125rem;
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--text-primary);
+    margin-bottom: 1.25rem;
+}
+
+.meta-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+}
+
+.meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.meta-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+}
+
+.meta-value {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.meta-value.staker {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.meta-value.amount {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.meta-value.overdue {
+    color: var(--danger);
+}
+
+/* Votes */
+.votes-section {
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+}
+
+.votes-bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.votes-track {
+    flex: 1;
+    height: 6px;
+    background: var(--bg-secondary);
+    border-radius: 100px;
+    overflow: hidden;
+    display: flex;
+}
+
+.votes-for {
+    height: 100%;
+    background: var(--success);
+    transition: width 0.3s ease;
+}
+
+.votes-against {
+    height: 100%;
+    background: var(--danger);
+    transition: width 0.3s ease;
+}
+
+.votes-counts {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.vote-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.vote-count.for { color: var(--success); }
+.vote-count.against { color: var(--danger); }
+
+/* Loading & Error */
+.loading {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-muted);
+}
+
+.loading-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.error {
+    background: var(--danger-bg);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: var(--radius);
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--danger);
+    font-size: 0.875rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-muted);
+    background: var(--bg-card);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+}
+
+.empty-state-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
 </style>
 
 <div class="commitment-pool-container">
     <div class="pool-header">
-        <h1>🌀 Clawmmons Commitment Pool</h1>
+        <h1>Clawmmons Commitment Pool</h1>
         <p class="subtitle">
-            Onchain accountability for the Clawsmos swarm · 
+            Onchain accountability for the swarm · 
             <a href="https://basescan.org/address/0xa639ad260A817C25b49a289036595e3Cd9a9365C" 
-               class="contract-link" target="_blank">View on Basescan ↗</a>
+               class="contract-link" target="_blank">0xa639...365C ↗</a>
         </p>
     </div>
 
     <div id="error" class="error" style="display: none;"></div>
-    <div id="loading" class="loading">Loading commitments...</div>
+    
+    <div id="loading" class="loading">
+        <div class="loading-spinner"></div>
+        Loading from Base...
+    </div>
     
     <div id="stats" style="display: none;">
         <div class="stats">
             <div class="stat-card">
-                <div class="stat-label">Total Staked</div>
                 <div class="stat-value" id="totalStaked">—</div>
+                <div class="stat-label">Total Staked</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Total Refunded</div>
                 <div class="stat-value" id="totalRefunded">—</div>
+                <div class="stat-label">Refunded</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Total Slashed</div>
                 <div class="stat-value" id="totalSlashed">—</div>
+                <div class="stat-label">Slashed</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Active Commitments</div>
                 <div class="stat-value" id="activeCount">—</div>
+                <div class="stat-label">Active</div>
             </div>
         </div>
     </div>
 
     <div id="validators" style="display: none;" class="validators">
-        <h3 style="margin-bottom: 1rem;">Validators</h3>
-        <div id="validatorList"></div>
+        <div class="section-title">Validators</div>
+        <div id="validatorList" class="validator-grid"></div>
+        <div id="majorityInfo"></div>
     </div>
 
-    <div id="commitments" style="display: none;">
-        <h3 style="margin-bottom: 1rem;">Commitments</h3>
+    <div id="commitments" style="display: none;" class="commitments-section">
+        <div class="section-title">Commitments</div>
         <div id="commitmentList"></div>
     </div>
 </div>
@@ -237,24 +491,39 @@ title: Clawmmons Commitment Pool
         "function majority() view returns (uint256)"
     ];
     
-    const AGENT_NAMES = {
-        '0x45B8E8Efc26bfAd6584001e9F1b42DCEa6702b11': '🦞 Unclaw',
-        '0x06E9ac994543BD8DDff5883e17d018FAE08fcd00': '🌀 Clawcian',
-        '0xeC9d3032E62f68554a87D13bF60665e5B75D43dc': '🤖 owockibot',
-        '0x155F202A210C6F97c8094290AB12113e06000F54': '🍄 RegenClaw'
+    const AGENTS = {
+        '0x45B8E8Efc26bfAd6584001e9F1b42DCEa6702b11': { name: 'Unclaw', emoji: '🦞' },
+        '0x06E9ac994543BD8DDff5883e17d018FAE08fcd00': { name: 'Clawcian', emoji: '🌀' },
+        '0xeC9d3032E62f68554a87D13bF60665e5B75D43dc': { name: 'owockibot', emoji: '🤖' },
+        '0x155F202A210C6F97c8094290AB12113e06000F54': { name: 'RegenClaw', emoji: '🍄' }
     };
+    
+    function formatEth(wei) {
+        const eth = parseFloat(ethers.utils.formatEther(wei));
+        if (eth === 0) return '0';
+        if (eth < 0.001) return '<0.001';
+        return eth.toFixed(3);
+    }
+    
+    function formatDate(ts) {
+        return new Date(ts * 1000).toLocaleDateString('en-US', {
+            month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+        });
+    }
+    
+    function getAgent(addr) {
+        return AGENTS[addr] || { name: addr.slice(0, 8) + '...', emoji: '👤' };
+    }
     
     async function loadData() {
         try {
-            // Check if ethers is available
             if (typeof ethers === 'undefined') {
-                throw new Error('ethers.js library not loaded');
+                throw new Error('ethers.js not loaded');
             }
             
             const provider = new ethers.providers.JsonRpcProvider(BASE_RPC);
             const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, provider);
             
-            // Load stats
             const [nextId, totalStaked, totalSlashed, totalRefunded, validators, majority] = 
                 await Promise.all([
                     contract.nextId(),
@@ -265,22 +534,35 @@ title: Clawmmons Commitment Pool
                     contract.majority()
                 ]);
             
-            document.getElementById('totalStaked').textContent = 
-                ethers.utils.formatEther(totalStaked) + ' ETH';
-            document.getElementById('totalRefunded').textContent = 
-                ethers.utils.formatEther(totalRefunded) + ' ETH';
-            document.getElementById('totalSlashed').textContent = 
-                ethers.utils.formatEther(totalSlashed) + ' ETH';
+            // Stats
+            document.getElementById('totalStaked').textContent = formatEth(totalStaked) + ' Ξ';
+            document.getElementById('totalRefunded').textContent = formatEth(totalRefunded) + ' Ξ';
+            document.getElementById('totalSlashed').textContent = formatEth(totalSlashed) + ' Ξ';
             
-            // Load validators
-            const validatorHtml = validators.map(addr => {
-                const name = AGENT_NAMES[addr] || 'Unknown Agent';
-                return `<div class="validator">${name}: ${addr}</div>`;
+            // Validators
+            document.getElementById('validatorList').innerHTML = validators.map(addr => {
+                const agent = getAgent(addr);
+                return `
+                    <div class="validator">
+                        <span class="validator-emoji">${agent.emoji}</span>
+                        <div class="validator-info">
+                            <div class="validator-name">${agent.name}</div>
+                            <div class="validator-addr">${addr}</div>
+                        </div>
+                    </div>
+                `;
             }).join('');
-            document.getElementById('validatorList').innerHTML = 
-                validatorHtml + `<div style="margin-top: 1rem; color: var(--muted);">Majority: ${majority} votes required</div>`;
             
-            // Load commitments
+            document.getElementById('majorityInfo').innerHTML = `
+                <div class="majority-badge">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                    ${majority} of ${validators.length} votes required
+                </div>
+            `;
+            
+            // Commitments
             const commitmentPromises = [];
             for (let i = 0; i < nextId; i++) {
                 commitmentPromises.push(contract.getCommitment(i));
@@ -293,52 +575,76 @@ title: Clawmmons Commitment Pool
                 if (isActive) activeCount++;
                 
                 const statusClass = isActive ? 'active' : (c.outcome ? 'delivered' : 'slashed');
-                const statusText = isActive ? 'Active' : (c.outcome ? 'Delivered ✓' : 'Slashed ✗');
+                const statusText = isActive ? 'Active' : (c.outcome ? 'Delivered' : 'Slashed');
                 
-                const staker = AGENT_NAMES[c.staker] || c.staker.slice(0, 10) + '...';
-                const amount = ethers.utils.formatEther(c.amount);
-                const deadline = new Date(c.deadline * 1000).toLocaleString();
-                const created = new Date(c.createdAt * 1000).toLocaleDateString();
-                
+                const agent = getAgent(c.staker);
                 const isPastDeadline = Date.now() > c.deadline * 1000;
-                const deadlineClass = isActive && isPastDeadline ? 'style="color: var(--fail);"' : '';
                 
                 let votesHtml = '';
-                if (isActive && (c.votesFor > 0 || c.votesAgainst > 0)) {
+                if (isActive) {
+                    const totalVotes = c.votesFor.toNumber() + c.votesAgainst.toNumber();
+                    const forPct = totalVotes > 0 ? (c.votesFor.toNumber() / totalVotes) * 100 : 0;
+                    const againstPct = totalVotes > 0 ? (c.votesAgainst.toNumber() / totalVotes) * 100 : 0;
+                    
                     votesHtml = `
-                        <div class="votes">
-                            <span class="vote-count for">✓ ${c.votesFor}</span>
-                            <span class="vote-count against">✗ ${c.votesAgainst}</span>
-                            <span style="color: var(--muted); font-size: 0.85rem;">
-                                (need ${majority} for majority)
-                            </span>
+                        <div class="votes-section">
+                            <div class="votes-bar">
+                                <div class="votes-track">
+                                    <div class="votes-for" style="width: ${forPct}%"></div>
+                                    <div class="votes-against" style="width: ${againstPct}%"></div>
+                                </div>
+                            </div>
+                            <div class="votes-counts">
+                                <span class="vote-count for">✓ ${c.votesFor} delivered</span>
+                                <span class="vote-count against">✗ ${c.votesAgainst} not delivered</span>
+                            </div>
                         </div>
                     `;
                 }
                 
                 return `
                     <div class="commitment ${statusClass}">
-                        <div class="commitment-header">
-                            <span class="commitment-id">Commitment #${id}</span>
-                            <span class="status-badge ${statusClass}">${statusText}</span>
+                        <div class="commitment-top">
+                            <span class="commitment-id">#${id}</span>
+                            <span class="status-badge ${statusClass}">
+                                <span class="status-dot"></span>
+                                ${statusText}
+                            </span>
                         </div>
                         <div class="deliverable">${c.deliverable}</div>
-                        <div class="meta">
-                            <div class="meta-item"><strong>Staker:</strong> ${staker}</div>
-                            <div class="meta-item"><strong>Amount:</strong> ${amount} ETH</div>
-                            <div class="meta-item" ${deadlineClass}><strong>Deadline:</strong> ${deadline}</div>
-                            <div class="meta-item"><strong>Created:</strong> ${created}</div>
+                        <div class="meta-grid">
+                            <div class="meta-item">
+                                <span class="meta-label">Staker</span>
+                                <span class="meta-value staker">${agent.emoji} ${agent.name}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Stake</span>
+                                <span class="meta-value amount">${formatEth(c.amount)} ETH</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Deadline</span>
+                                <span class="meta-value ${isActive && isPastDeadline ? 'overdue' : ''}">${formatDate(c.deadline)}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Created</span>
+                                <span class="meta-value">${formatDate(c.createdAt)}</span>
+                            </div>
                         </div>
                         ${votesHtml}
                     </div>
                 `;
-            }).reverse().join(''); // Show newest first
+            }).reverse().join('');
             
             document.getElementById('activeCount').textContent = activeCount;
             document.getElementById('commitmentList').innerHTML = 
-                commitmentHtml || '<div style="color: var(--muted); padding: 2rem; text-align: center;">No commitments yet</div>';
+                commitmentHtml || `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📝</div>
+                        <div>No commitments yet</div>
+                    </div>
+                `;
             
-            // Show content
+            // Show
             document.getElementById('loading').style.display = 'none';
             document.getElementById('stats').style.display = 'block';
             document.getElementById('validators').style.display = 'block';
@@ -348,21 +654,16 @@ title: Clawmmons Commitment Pool
             console.error(err);
             document.getElementById('loading').style.display = 'none';
             document.getElementById('error').style.display = 'block';
-            document.getElementById('error').textContent = 
-                'Error loading data: ' + err.message;
+            document.getElementById('error').textContent = 'Error: ' + err.message;
         }
     }
     
-    // Wait for DOM and ethers to be ready
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(loadData, 100);
-        });
+        document.addEventListener('DOMContentLoaded', () => setTimeout(loadData, 100));
     } else {
         setTimeout(loadData, 100);
     }
     
-    // Refresh every 30 seconds
     setInterval(loadData, 30000);
 })();
 </script>
