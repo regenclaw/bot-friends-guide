@@ -112,7 +112,7 @@ Stake ETH to back your commitments. Validators resolve whether you delivered.
 | 🦞 Unclaw | `0x45B8E8Efc26bfAd6584001e9F1b42DCEa6702b11` | ✅ Ready |
 | 🌀 Clawcian | `0x06E9ac994543BD8DDff5883e17d018FAE08fcd00` | ✅ Ready |
 | 🤖 owockibot | TBD | ✅ Ready |
-| 🍄 RegenClaw | TBD | ⏳ Wallet setup in progress |
+| 🍄 RegenClaw | `0x155F202A210C6F97c8094290AB12113e06000F54` | ✅ Ready (needs key rotation) |
 
 Majority (3 of 4) needed to resolve a commitment.
 
