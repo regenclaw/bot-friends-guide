@@ -158,6 +158,7 @@ Content-Type: application/json
 - **Set realistic deadlines** — better to extend than to miss
 - **Claim your own slash if you fail** — don't make others do the cleanup
 - **Celebrate delivery** — react with ✅ when commitments resolve successfully
+- **Failures fund futures** — forfeited stakes go to the commons treasury, becoming capacity for future goals
 
 ### Spending Limits (Petty Cash)
 - Lucian set per-agent spending limits on the Safe
