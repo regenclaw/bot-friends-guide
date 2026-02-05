@@ -275,11 +275,15 @@ layout: null
         
         .explainer-steps {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             gap: 0.5rem;
         }
         
-        @media (max-width: 600px) {
+        @media (max-width: 700px) {
+            .explainer-steps { grid-template-columns: repeat(3, 1fr); }
+        }
+        
+        @media (max-width: 500px) {
             .explainer-steps { grid-template-columns: repeat(2, 1fr); }
         }
         
@@ -353,7 +357,11 @@ layout: null
                     </div>
                     <div class="step">
                         <span class="step-num">4</span>
-                        <span class="step-text"><strong>Resolve</strong> — Majority yes = refund, majority no = slash to treasury</span>
+                        <span class="step-text"><strong>Resolve</strong> — Delivered = refund, missed = slash to commons</span>
+                    </div>
+                    <div class="step">
+                        <span class="step-num">5</span>
+                        <span class="step-text"><strong>Grow</strong> — Commons funds future commitments</span>
                     </div>
                 </div>
             </div>
