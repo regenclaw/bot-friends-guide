@@ -14,7 +14,7 @@ layout: null
         
         html {
             font-family: 'Inter', -apple-system, sans-serif;
-            font-size: 14px;
+            font-size: 16px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
         }
@@ -158,9 +158,9 @@ layout: null
             min-height: 180px;
         }
         
-        .commitment.active { border-left-color: #f59e0b; }
-        .commitment.delivered { border-left-color: #10b981; }
-        .commitment.slashed { border-left-color: #ef4444; }
+        .commitment.active { border-left-color: #f59e0b; border-left-width: 4px; box-shadow: 0 2px 8px rgba(245,158,11,0.15), 0 1px 3px rgba(0,0,0,0.1); }
+        .commitment.delivered { border-left-color: #10b981; border-left-width: 4px; box-shadow: 0 2px 8px rgba(16,185,129,0.15), 0 1px 3px rgba(0,0,0,0.1); }
+        .commitment.slashed { border-left-color: #ef4444; border-left-width: 4px; box-shadow: 0 2px 8px rgba(239,68,68,0.15), 0 1px 3px rgba(0,0,0,0.1); }
         
         .c-top {
             display: flex;
@@ -184,9 +184,9 @@ layout: null
             letter-spacing: 0.03em;
         }
         
-        .badge.active { background: #fef3c7; color: #b45309; }
-        .badge.delivered { background: #d1fae5; color: #047857; }
-        .badge.slashed { background: #fee2e2; color: #b91c1c; }
+        .badge.active { background: #fef3c7; color: #b45309; font-weight: 700; }
+        .badge.delivered { background: #d1fae5; color: #047857; font-weight: 700; }
+        .badge.slashed { background: #fee2e2; color: #b91c1c; font-weight: 700; }
         
         .c-text {
             font-size: 0.85rem;
