@@ -442,7 +442,7 @@ layout: null
         };
         
         const fmt = w => { const e = +ethers.utils.formatEther(w); return e === 0 ? '0' : e < 0.001 ? '<.001' : e.toFixed(3); };
-        const dt = t => new Date(t*1000).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+        const dt = t => { const d = new Date(t*1000); const tz = d.toLocaleTimeString('en-US',{timeZoneName:'short'}).split(' ').pop(); return d.toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) + ' ' + tz; };
         const ag = a => AG[a] || a.slice(0,6)+'…';
         
         async function load() {
