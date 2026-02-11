@@ -253,6 +253,7 @@ layout: null
             border-radius: 100px;
         }
         
+        .vote-chip.voted { background: #e0e7ff; color: #4338ca; }
         .vote-chip.for { background: #d1fae5; color: #047857; }
         .vote-chip.against { background: #fee2e2; color: #b91c1c; }
         
@@ -429,7 +430,7 @@ layout: null
             "function getCommitment(uint256) view returns (tuple(address,uint256,string,uint256,uint8,bool,uint256,uint256,uint256,uint256))",
             "function getValidators() view returns (address[])",
             "function majority() view returns (uint256)",
-            "event Voted(uint256 indexed id, address indexed validator, bool delivered, uint256 forVotes, uint256 againstVotes)"
+            "function hasVoted(uint256,address) view returns (bool)"
         ];
         const AG = {
             '0x45B8E8Efc26bfAd6584001e9F1b42DCEa6702b11': '🦞 Unclaw',
@@ -465,31 +466,20 @@ layout: null
                 
                 const commits = await Promise.all(Array.from({length:n},(_,i)=>c.getCommitment(i)));
                 
-                // Query Voted events using publicnode (50k block range limit)
-                let votedEvents = [];
-                try {
-                    const evtProvider = new ethers.providers.JsonRpcProvider('https://base-rpc.publicnode.com');
-                    const evtContract = new ethers.Contract(C, ABI, evtProvider);
-                    const votedFilter = evtContract.filters.Voted();
-                    const curBlock = await evtProvider.getBlockNumber();
-                    // Contract deployed ~41800000; scan from there in 49k chunks
-                    const deployBlock = 41800000;
-                    const chunkSize = 49000;
-                    const chunks = [];
-                    for (let from = deployBlock; from <= curBlock; from += chunkSize) {
-                        chunks.push(evtContract.queryFilter(votedFilter, from, Math.min(from + chunkSize - 1, curBlock)));
-                    }
-                    const results = await Promise.all(chunks);
-                    results.forEach(r => votedEvents.push(...r));
-                } catch(e) { console.warn('Vote events query failed:', e); }
-                
-                // Group votes by commitment ID
+                // Check which validators voted on each commitment using hasVoted()
                 const votesByCommit = {};
-                votedEvents.forEach(ev => {
-                    const id = ev.args.id.toNumber();
-                    if (!votesByCommit[id]) votesByCommit[id] = [];
-                    votesByCommit[id].push({ validator: ev.args.validator, delivered: ev.args.delivered });
-                });
+                const voteChecks = [];
+                for (let i = 0; i < n; i++) {
+                    votesByCommit[i] = [];
+                    for (const addr of v) {
+                        voteChecks.push(
+                            c.hasVoted(i, addr).then(voted => {
+                                if (voted) votesByCommit[i].push({ validator: addr, delivered: true });
+                            }).catch(() => {})
+                        );
+                    }
+                }
+                await Promise.all(voteChecks);
                 
                 let act = 0;
                 
@@ -507,7 +497,7 @@ layout: null
                     let voteChips = '';
                     if (myVotes.length > 0) {
                         voteChips = `<div class="vote-chips">${myVotes.map(v => 
-                            `<span class="vote-chip ${v.delivered ? 'for' : 'against'}">${v.delivered ? '✓' : '✗'} ${ag(v.validator)}</span>`
+                            `<span class="vote-chip voted">✓ ${ag(v.validator)}</span>`
                         ).join('')}</div>`;
                     }
                     
