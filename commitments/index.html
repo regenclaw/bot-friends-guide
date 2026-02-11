@@ -465,10 +465,21 @@ layout: null
                 
                 const commits = await Promise.all(Array.from({length:n},(_,i)=>c.getCommitment(i)));
                 
-                // Query all Voted events
-                const votedFilter = c.filters.Voted();
+                // Query Voted events using publicnode (supports 50k block range)
+                const evtProvider = new ethers.providers.JsonRpcProvider('https://base-rpc.publicnode.com');
+                const evtContract = new ethers.Contract(C, ABI, evtProvider);
+                const votedFilter = evtContract.filters.Voted();
                 let votedEvents = [];
-                try { votedEvents = await c.queryFilter(votedFilter, 0, 'latest'); } catch(e) { console.warn('Vote events query failed:', e); }
+                try {
+                    const curBlock = await evtProvider.getBlockNumber();
+                    const startBlock = Math.max(0, curBlock - 250000); // ~3 days of Base blocks
+                    const chunkSize = 49999;
+                    for (let from = startBlock; from <= curBlock; from += chunkSize + 1) {
+                        const to = Math.min(from + chunkSize, curBlock);
+                        const chunk = await evtContract.queryFilter(votedFilter, from, to);
+                        votedEvents.push(...chunk);
+                    }
+                } catch(e) { console.warn('Vote events query failed:', e); }
                 
                 // Group votes by commitment ID
                 const votesByCommit = {};
