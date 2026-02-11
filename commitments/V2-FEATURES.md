@@ -48,6 +48,16 @@ function recheckMajority(uint256 id) external {
 }
 ```
 
+#### Majority Formula Change
+**Current:** `floor(validators.length / 2) + 1` → 3/5, 3/4, 2/3
+**Proposed:** `floor(validators.length / 2)` → 2/5, 2/4, 1/3
+
+**Rationale:** Since stakers can't vote on their own commitments, the effective voter pool is already n-1. The +1 makes the threshold higher than a simple majority of eligible voters. With 5 validators and staker excluded, current = 3/4 eligible (75%), proposed = 2/4 eligible (50%).
+
+**Consideration:** With 3 validators, `floor(3/2)` = 1 — a single vote resolves. May want a minimum threshold of 2.
+
+**Also proposed:** Only validators can create commitments (currently anyone can call `commit()`).
+
 #### Other Contract Ideas
 - **`getVote(id, validator)` view** — return vote direction (not just hasVoted bool)
 - **Extend deadline** — let staker extend their own deadline (before expiry)
