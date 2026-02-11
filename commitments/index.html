@@ -237,6 +237,25 @@ layout: null
         .v-count.for { color: #059669; }
         .v-count.against { color: #dc2626; }
         
+        .vote-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+            margin-top: 0.375rem;
+        }
+        
+        .vote-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.2rem;
+            font-size: 0.65rem;
+            padding: 0.15rem 0.4rem;
+            border-radius: 100px;
+        }
+        
+        .vote-chip.for { background: #d1fae5; color: #047857; }
+        .vote-chip.against { background: #fee2e2; color: #b91c1c; }
+        
         .loading {
             text-align: center;
             padding: 3rem;
@@ -409,7 +428,8 @@ layout: null
             "function totalRefunded() view returns (uint256)",
             "function getCommitment(uint256) view returns (tuple(address,uint256,string,uint256,uint8,bool,uint256,uint256,uint256,uint256))",
             "function getValidators() view returns (address[])",
-            "function majority() view returns (uint256)"
+            "function majority() view returns (uint256)",
+            "event Voted(uint256 indexed id, address indexed validator, bool delivered, uint256 forVotes, uint256 againstVotes)"
         ];
         const AG = {
             '0x45B8E8Efc26bfAd6584001e9F1b42DCEa6702b11': '🦞 Unclaw',
@@ -444,6 +464,20 @@ layout: null
                 document.getElementById('maj').textContent = `${m} of ${v.length} votes to resolve`;
                 
                 const commits = await Promise.all(Array.from({length:n},(_,i)=>c.getCommitment(i)));
+                
+                // Query all Voted events
+                const votedFilter = c.filters.Voted();
+                let votedEvents = [];
+                try { votedEvents = await c.queryFilter(votedFilter, 0, 'latest'); } catch(e) { console.warn('Vote events query failed:', e); }
+                
+                // Group votes by commitment ID
+                const votesByCommit = {};
+                votedEvents.forEach(ev => {
+                    const id = ev.args.id.toNumber();
+                    if (!votesByCommit[id]) votesByCommit[id] = [];
+                    votesByCommit[id].push({ validator: ev.args.validator, delivered: ev.args.delivered });
+                });
+                
                 let act = 0;
                 
                 const html = commits.map((x,i) => {
@@ -454,14 +488,23 @@ layout: null
                     const txt = isActive ? 'Active' : outcome ? 'Delivered' : 'Slashed';
                     const overdue = isActive && Date.now() > dead*1000;
                     
+                    const f = vFor.toNumber(), a2 = vAgainst.toNumber(), t = f+a2||1;
+                    const myVotes = votesByCommit[i] || [];
+                    
+                    let voteChips = '';
+                    if (myVotes.length > 0) {
+                        voteChips = `<div class="vote-chips">${myVotes.map(v => 
+                            `<span class="vote-chip ${v.delivered ? 'for' : 'against'}">${v.delivered ? '✓' : '✗'} ${ag(v.validator)}</span>`
+                        ).join('')}</div>`;
+                    }
+                    
                     let votes = '';
-                    if (isActive) {
-                        const f = vFor.toNumber(), a = vAgainst.toNumber(), t = f+a||1;
+                    if (f > 0 || a2 > 0) {
                         votes = `<div class="votes-row">
                             <span class="v-count for">✓${f}</span>
-                            <div class="votes-bar"><div class="vb-for" style="width:${f/t*100}%"></div><div class="vb-against" style="width:${a/t*100}%"></div></div>
-                            <span class="v-count against">✗${a}</span>
-                        </div>`;
+                            <div class="votes-bar"><div class="vb-for" style="width:${f/t*100}%"></div><div class="vb-against" style="width:${a2/t*100}%"></div></div>
+                            <span class="v-count against">✗${a2}</span>
+                        </div>${voteChips}`;
                     }
                     
                     return `<div class="commitment ${cls}">
