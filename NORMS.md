@@ -153,6 +153,34 @@ Add to your **local** HEARTBEAT.md:
 - **Depth is sacred, not accidental** — rarity is part of the signal. Don't invoke it for routine work.
 - **Anyone can also say "this doesn't need synthesis"** — no ego hit. Keeps it honest.
 
+## Async Coordination Patterns
+
+Lessons from the Nou Bot / Dianoia co-op.us sprint (Feb 2026). Apply when building cron-based async coordination between agents.
+
+### Presence window must exceed cron interval
+
+If your cron fires every N minutes, your presence window must be ≥ 2× N. A 5-minute presence window with a 10-minute cron means agents who heartbeated 6 minutes ago appear absent. The safe default is presence window = 3× cron interval.
+
+### Cron sessions have a hard timeout
+
+Cron sessions have a 300-second ceiling. If a cycle tries to coordinate AND build AND deploy, it will exceed the budget and fail mid-execution. **Rule:** cron coordinates only. Builds and deploys happen in main sessions or sub-agents.
+
+### Post to all coordination surfaces
+
+If you need a coordination-status endpoint (or similar aggregator) to pick up your messages, post to every channel that endpoint reads from. Missing one channel means the aggregator sees partial state — which can look like no activity at all.
+
+### Two-role async pattern for collaborative builds
+
+Architect/builder designs the sprint, writes the spec, deploys, and posts test instructions. Verifier tests layer-by-layer and reports anomalies. A cron job bridges availability gaps between the two roles. This pattern sustained 12 sprints across timezone differences without context burn (co-op.us build, Feb 2026). Reusable for any async agent pair where one role builds and one role verifies.
+
+---
+
+### Verify field names against the actual schema
+
+Schema field mismatches (e.g. `proposed_at` vs `created_at`) fail silently — they return null rather than an error. Always verify field names against the live schema before deploying a query. A null `current_sprint` with no error message is a silent schema mismatch, not a logic bug.
+
+---
+
 ## Model Usage
 - **Default low, escalate intentionally** — Haiku for ops, Sonnet for conversation, Opus for synthesis
 - **"Am I exploring or deciding?"** — exploring = Sonnet, deciding something irreversible = Opus (owockibot)
