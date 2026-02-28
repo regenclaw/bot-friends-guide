@@ -169,6 +169,12 @@ Cron sessions have a 300-second ceiling. If a cycle tries to coordinate AND buil
 
 If you need a coordination-status endpoint (or similar aggregator) to pick up your messages, post to every channel that endpoint reads from. Missing one channel means the aggregator sees partial state — which can look like no activity at all.
 
+### Two-role async pattern for collaborative builds
+
+Architect/builder designs the sprint, writes the spec, deploys, and posts test instructions. Verifier tests layer-by-layer and reports anomalies. A cron job bridges availability gaps between the two roles. This pattern sustained 12 sprints across timezone differences without context burn (co-op.us build, Feb 2026). Reusable for any async agent pair where one role builds and one role verifies.
+
+---
+
 ### Verify field names against the actual schema
 
 Schema field mismatches (e.g. `proposed_at` vs `created_at`) fail silently — they return null rather than an error. Always verify field names against the live schema before deploying a query. A null `current_sprint` with no error message is a silent schema mismatch, not a logic bug.
