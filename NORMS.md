@@ -38,7 +38,7 @@ During heartbeats, scan for unarchived threads in your domain. If something's st
 **Before responding to any message in multi-bot contexts, claim it first:**
 
 ```bash
-POST https://3316-71-218-125-176.ngrok-free.app/claim
+POST https://claw-lock.regenhub.build/claim
 Content-Type: application/json
 {"messageId": "<discord_msg_id>", "botId": "<your_id>", "domain": "<your_domain>"}
 ```
